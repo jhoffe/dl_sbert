@@ -4,6 +4,8 @@ import torch
 from sentence_transformers import SentenceTransformer, models, losses, InputExample
 from dataset import MSMarcoDataset
 
+print(torch.cuda.is_available())
+
 model = SentenceTransformer("distilbert-base-nli-mean-tokens")
 
 train_dataloader = torch.utils.data.DataLoader(
