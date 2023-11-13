@@ -41,7 +41,7 @@ class MSMarcoDataset(Dataset):
     def __len__(self) -> int:
         return len(self.qrels)
 
-    def __getitem__(self, idx: int) -> tuple[str, str, int]:
+    def __getitem__(self, idx: int):
         query_id, passage_id, label = self.qrels[idx]
 
         return InputExample(
@@ -53,20 +53,20 @@ class MSMarcoDataset(Dataset):
 class MSMarcoDatasetTest(Dataset):
     def __init__(
         self,
-        dataset_path: str = "data\msmarco-passagetest2019-top1000.tsv",
+        dataset_path: str = "data/msmarco-passagetest2019-top1000.tsv",
     ):
         self.ds_path = dataset_path
 
-        ds_table = pd.read_csv(
+        self.ds_table = pd.read_csv(
             self.ds_path,
             sep="\t",
             header=None,
             names=["query_id", "passage_id", "query", "passage"],
         )
 
-        self.passages = ds_table["passage"].tolist()
+        self.passages = self.ds_table["passage"].tolist()
 
-        self.queries = ds_table["query"].tolist()
+        self.queries = self.ds_table["query"].tolist()
 
         self.scores = np.ones(len(self.passages))
 
