@@ -11,8 +11,14 @@ print("Is there a GPU:", torch.cuda.is_available())
 
 model = SentenceTransformer("distilbert-base-nli-mean-tokens")
 
+train_ds = MSMarcoDataset(
+    qrels_path="data/qrels.train.tsv",
+    queries_path="data/queries.train.tsv",
+    passages_path="data/collection.tsv"
+)
+
 train_dataloader = torch.utils.data.DataLoader(
-    MSMarcoDataset(), batch_size=16, shuffle=True
+    train_ds, batch_size=256, shuffle=True
 )
 test_data = MSMarcoDatasetTest()
 train_loss = losses.CosineSimilarityLoss(model=model)
@@ -26,9 +32,9 @@ relevant_docs_dict = (
     .to_dict()["passage_id"]
 )
 
-relevant_docs_dict = {
-    qid: set(list(pids)[:10]) for qid, pids in relevant_docs_dict.items()
-}
+# relevant_docs_dict = {
+#     qid: set(list(pids)[:10]) for qid, pids in relevant_docs_dict.items()
+# }
 
 all_doc_ids = set([d for ds in relevant_docs_dict.values() for d in ds])
 
@@ -41,17 +47,17 @@ ir = evaluation.InformationRetrievalEvaluator(
     queries=qid_to_query,
     corpus=cid_to_doc,
     relevant_docs=relevant_docs_dict,
-    batch_size=16,
+    batch_size=256,
     name="test",
     show_progress_bar=True,
 )
 
 model.fit(
     train_objectives=[(train_dataloader, train_loss)],
-    epochs=1,
-    warmup_steps=100,
+    epochs=10,
+    warmup_steps=500,
     output_path="models/",
     evaluator=ir,
-    evaluation_steps=100,
+    evaluation_steps=1000,
     show_progress_bar=True,
 )
