@@ -1,7 +1,7 @@
 #!/bin/sh
 ### General options
 ### -- specify queue --
-#BSUB -q gpuh100
+#BSUB -q gpua100
 ### -- set the job Name --
 #BSUB -J dl_sbert
 ### -- ask for number of cores (default: 1) --
