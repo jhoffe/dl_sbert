@@ -24,6 +24,12 @@
 #BSUB -o Output_dl_sbert_train_%J.out
 #BSUB -e Output_dl_sbert_train_%J.err
 
-./scripts/activate.sh
+cd /work3/s204071/dl_sbert
+
+module load python3/3.10.12
+module load cuda/11.8
+
+# Activate the relevant virtual environment:
+source ./venv/bin/activate
 
 python testshit.py
