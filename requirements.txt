@@ -1,1 +1,6 @@
 sentence-transformers
+pandas
+numpy
+torch
+torchmetrics
+scikit-learn
