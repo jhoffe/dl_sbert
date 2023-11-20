@@ -1,0 +1,80 @@
+{
+    "os": "Linux-6.4.6-76060406-generic-x86_64-with-glibc2.35",
+    "python": "3.10.13",
+    "heartbeatAt": "2023-11-20T10:20:47.940086",
+    "startedAt": "2023-11-20T10:20:46.828504",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/jonashoffmann/Projects/dl_sbert/main.py",
+    "codePathLocal": "main.py",
+    "codePath": "main.py",
+    "git": {
+        "remote": "git@github.com:jhoffe/dl_sbert.git",
+        "commit": "953e7bfc975c57b4396f029718cddc8061cae407"
+    },
+    "email": "s204071@dtu.dk",
+    "root": "/home/jonashoffmann/Projects/dl_sbert",
+    "host": "pop-os",
+    "username": "jonashoffmann",
+    "executable": "/home/jonashoffmann/miniconda3/envs/dl_sbert/bin/python",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 1950.009,
+        "min": 800.0,
+        "max": 4000.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1899.349,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1899.669,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1900.034,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1899.896,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1899.998,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1900.039,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1901.792,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 2300.0,
+            "min": 800.0,
+            "max": 4000.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 448.5032272338867,
+            "used": 193.8755874633789
+        }
+    },
+    "memory": {
+        "total": 15.256744384765625
+    }
+}

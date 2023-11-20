@@ -17,7 +17,8 @@ def train():
 
     trainer = L.Trainer(
         max_epochs=50,
-        devices=1 if torch.cuda.is_available() else 0,
+        accelerator="auto",
+        devices="auto",
         deterministic=True,
         logger=logger
     )

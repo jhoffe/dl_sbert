@@ -1,0 +1,80 @@
+{
+    "os": "Linux-6.4.6-76060406-generic-x86_64-with-glibc2.35",
+    "python": "3.10.13",
+    "heartbeatAt": "2023-11-20T10:03:54.270803",
+    "startedAt": "2023-11-20T10:03:52.843019",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/jonashoffmann/Projects/dl_sbert/main.py",
+    "codePathLocal": "main.py",
+    "codePath": "main.py",
+    "git": {
+        "remote": "git@github.com:jhoffe/dl_sbert.git",
+        "commit": "953e7bfc975c57b4396f029718cddc8061cae407"
+    },
+    "email": "s204071@dtu.dk",
+    "root": "/home/jonashoffmann/Projects/dl_sbert",
+    "host": "pop-os",
+    "username": "jonashoffmann",
+    "executable": "/home/jonashoffmann/miniconda3/envs/dl_sbert/bin/python",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 1016.231625,
+        "min": 800.0,
+        "max": 4000.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1100.003,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1019.483,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1100.052,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1099.53,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1099.972,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1100.007,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1099.735,
+            "min": 800.0,
+            "max": 4000.0
+        },
+        {
+            "current": 1100.676,
+            "min": 800.0,
+            "max": 4000.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 448.5032272338867,
+            "used": 193.87201690673828
+        }
+    },
+    "memory": {
+        "total": 15.256744384765625
+    }
+}
