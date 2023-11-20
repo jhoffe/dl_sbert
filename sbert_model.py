@@ -10,7 +10,7 @@ class SBERT(L.LightningModule):
         super().__init__()
 
         self.model = model
-        self.pooling = models.Pooling(model.get_word_embedding_dimension())
+        self.pooling = models.Pooling(model.get_sentence_embedding_dimension())
 
         self.cosine = nn.CosineSimilarity()
         self.criterion = criterion
