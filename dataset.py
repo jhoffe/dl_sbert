@@ -49,7 +49,7 @@ class MSMarcoDataset(Dataset):
 
         random_passage_id = np.random.choice(avail_idx)
 
-        return query_id, random_passage_id, 0.0
+        return query_id, random_passage_id, -1.0
 
     def __getitem__(self, idx: int):
         if idx >= len(self.qrels):
