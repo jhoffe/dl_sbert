@@ -19,10 +19,12 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
     L.seed_everything(seed)
 
     model = SentenceTransformer(model)
+    tokenizer = model.tokenizer
+
 
     logger = WandbLogger(
         project="dl_sbert",
-        entity="jhoffe",
+        entity="colodingdong",
     )
 
     trainer = L.Trainer(
@@ -33,7 +35,7 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
         logger=logger
     )
 
-    datamodule = MSMarcoDataModule(batch_size=batch_size, num_workers=num_workers)
+    datamodule = MSMarcoDataModule(batch_size=batch_size, num_workers=num_workers, tokenizer=tokenizer)
 
     l_module = SBERT(model, torch.nn.MSELoss(), lr=lr)
 

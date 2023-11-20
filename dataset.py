@@ -9,10 +9,13 @@ class MSMarcoDataset(Dataset):
             qrels_path: str = "data/qrels.dev.small.tsv",
             queries_path: str = "data/queries.dev.small.tsv",
             passages_path: str = "data/collection.tsv",
+            tokenizer=None,
     ):
         self.qrels_path = qrels_path
         self.queries_path = queries_path
         self.passages_path = passages_path
+
+        self.tokenizer = tokenizer
 
         qrels_table = pd.read_csv(
             self.qrels_path,
@@ -43,14 +46,17 @@ class MSMarcoDataset(Dataset):
     def __getitem__(self, idx: int):
         query_id, passage_id, label = self.qrels[idx]
 
-        return self.queries[query_id], self.passages[passage_id], float(label)
+        return self.tokenizer.tokenize(self.queries[query_id]), self.tokenizer.tokenize(
+            self.passages[passage_id]), float(label)
 
 
 class MSMarcoDatasetTest(Dataset):
     def __init__(
             self,
             dataset_path: str = "data/msmarco-passagetest2019-top1000.tsv",
+            tokenizer=None
     ):
+        self.tokenizer = tokenizer
         self.ds_path = dataset_path
 
         self.ds_table = pd.read_csv(
@@ -70,4 +76,6 @@ class MSMarcoDatasetTest(Dataset):
         return len(self.passages)
 
     def __getitem__(self, idx: int) -> tuple[str, str, float]:
-        return self.queries[idx], self.passages[idx], 1.0
+        return self.tokenizer.tokenize(self.queries[idx]), self.tokenizer.tokenize(
+            self.passages[idx]
+        ), 1.0
