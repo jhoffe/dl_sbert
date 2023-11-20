@@ -21,7 +21,7 @@ class SBERT(L.LightningModule):
         self.cosine_similarity_test = torchmetrics.CosineSimilarity(reduction="mean")
 
     def forward(self, x: Tensor) -> Tensor:
-        x = self.model.encode(x)
+        x = self.model.encode(x, output_value="sentence_embedding")
         return self.pooling(x)
 
     def training_step(self, batch) -> Tensor:
