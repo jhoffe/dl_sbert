@@ -1,7 +1,7 @@
 #!/bin/sh
 ### General options
 ### -- specify queue --
-#BSUB -q gpua100
+#BSUB -q gpuv100
 ### -- set the job Name --
 #BSUB -J dl_sbert
 ### -- ask for number of cores (default: 1) --
@@ -32,4 +32,4 @@ module load cuda/11.8
 # Activate the relevant virtual environment:
 source ./venv/bin/activate
 
-python main.py --batch_size=128 --precision=bf16
+python main.py --batch_size=128 --precision=16

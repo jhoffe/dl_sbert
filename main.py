@@ -11,7 +11,7 @@ import click
 @click.command()
 @click.option("--batch_size", default=256, type=int)
 @click.option("--model", default="bert-base-nli-mean-tokens", type=str)
-@click.option("--epochs", default=50, type=int)
+@click.option("--epochs", default=1, type=int)
 @click.option("--seed", default=42, type=int)
 @click.option("--num_workers", default=None, type=int)
 @click.option("--lr", default=1e-5, type=float)
