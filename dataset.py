@@ -46,8 +46,7 @@ class MSMarcoDataset(Dataset):
     def __getitem__(self, idx: int):
         query_id, passage_id, label = self.qrels[idx]
 
-        return self.tokenizer.tokenize(self.queries[query_id]), self.tokenizer.tokenize(
-            self.passages[passage_id]), float(label)
+        return self.queries[query_id], self.passages[passage_id], float(label)
 
 
 class MSMarcoDatasetTest(Dataset):
@@ -70,12 +69,8 @@ class MSMarcoDatasetTest(Dataset):
 
         self.queries = self.ds_table["query"].tolist()
 
-        self.scores = np.ones(len(self.passages))
-
     def __len__(self) -> int:
         return len(self.passages)
 
     def __getitem__(self, idx: int) -> tuple[str, str, float]:
-        return self.tokenizer.tokenize(self.queries[idx]), self.tokenizer.tokenize(
-            self.passages[idx]
-        ), 1.0
+        return self.queries[idx], self.passages[idx], 1.0
