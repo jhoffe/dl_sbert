@@ -1,19 +1,35 @@
-import os
-from torch import optim, nn, utils, Tensor
+import torch
 import lightning as L
-from sentence_transformers import SentenceTransformer, models
+from sentence_transformers import SentenceTransformer
+
+from datamodule import MSMarcoDataModule
+from sbert_model import SBERT
+from lightning.pytorch.loggers import WandbLogger
 
 
-class SBERT(L.LightningModule):
-    def __init__(self, model: models.Transformer) -> None:
-        super().__init__()
+def train():
+    model = SentenceTransformer("bert-base-nli-mean-tokens")
 
-        self.word_embedding_left = model
-        self.word_embedding_right = model.clone()
+    logger = WandbLogger(
+        project="dl_sbert",
+        entity="jhoffe",
+    )
 
-        self.pooling_left = models.Pooling(model.get_word_embedding_dimension())
-        self.pooling_right = models.Pooling(model.get_word_embedding_dimension())
+    trainer = L.Trainer(
+        max_epochs=50,
+        gpus=1 if torch.cuda.is_available() else 0,
+        progress_bar_refresh_rate=1,
+        deterministic=True,
+        logger=logger
+    )
 
-    def forward(self, x: Tensor) -> Tensor:
-        embedding_left = self.word_embedding_left(x)
-        embedding_right = self.word_embedding_right(x)
+    datamodule = MSMarcoDataModule()
+
+    l_module = SBERT(model, torch.nn.MSELoss())
+
+    trainer.fit(l_module, datamodule)
+    trainer.test(l_module, datamodule)
+
+
+if __name__ == "__main__":
+    train()

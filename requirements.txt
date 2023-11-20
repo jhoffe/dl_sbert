@@ -1,6 +1,7 @@
 sentence-transformers
-pandas
-numpy
-torch
+pandas~=2.1.2
+numpy~=1.26.1
+torch~=2.1.0
 torchmetrics
 scikit-learn
+lightning~=2.1.0

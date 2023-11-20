@@ -1,15 +1,14 @@
 from torch.utils.data import Dataset
 import pandas as pd
-from sentence_transformers import InputExample
 import numpy as np
 
 
 class MSMarcoDataset(Dataset):
     def __init__(
-        self,
-        qrels_path: str = "data/qrels.dev.small.tsv",
-        queries_path: str = "data/queries.dev.small.tsv",
-        passages_path: str = "data/collection.tsv",
+            self,
+            qrels_path: str = "data/qrels.dev.small.tsv",
+            queries_path: str = "data/queries.dev.small.tsv",
+            passages_path: str = "data/collection.tsv",
     ):
         self.qrels_path = qrels_path
         self.queries_path = queries_path
@@ -44,16 +43,13 @@ class MSMarcoDataset(Dataset):
     def __getitem__(self, idx: int):
         query_id, passage_id, label = self.qrels[idx]
 
-        return InputExample(
-            texts=[self.queries[query_id], self.passages[passage_id]],
-            label=float(label),
-        )
+        return self.queries[query_id], self.passages[passage_id], float(label)
 
 
 class MSMarcoDatasetTest(Dataset):
     def __init__(
-        self,
-        dataset_path: str = "data/msmarco-passagetest2019-top1000.tsv",
+            self,
+            dataset_path: str = "data/msmarco-passagetest2019-top1000.tsv",
     ):
         self.ds_path = dataset_path
 
@@ -73,5 +69,5 @@ class MSMarcoDatasetTest(Dataset):
     def __len__(self) -> int:
         return len(self.passages)
 
-    def __getitem__(self, idx: int) -> tuple[str, str, int]:
-        return InputExample(texts=[self.queries[idx], self.passages[idx]], label=1.0)
+    def __getitem__(self, idx: int) -> tuple[str, str, float]:
+        return self.queries[idx], self.passages[idx], 1.0
