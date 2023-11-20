@@ -15,11 +15,12 @@ import click
 @click.option("--seed", default=42, type=int)
 @click.option("--num_workers", default=None, type=int)
 @click.option("--lr", default=1e-5, type=float)
-def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int, lr: float):
+@click.option("--precision", default=None, type=int | str | None)
+def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int, lr: float,
+          precision: int | None = None):
     L.seed_everything(seed)
 
     model = SentenceTransformer(model)
-
 
     logger = WandbLogger(
         project="dl_sbert",
@@ -31,7 +32,8 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
         accelerator="auto",
         devices=1 if torch.cuda.is_available() else "auto",
         deterministic=True,
-        logger=logger
+        logger=logger,
+        precision=precision
     )
 
     datamodule = MSMarcoDataModule(batch_size=batch_size, num_workers=num_workers)
