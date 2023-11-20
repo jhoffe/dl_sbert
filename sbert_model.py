@@ -1,8 +1,9 @@
 import torch
 from torch import nn, Tensor
 import lightning as L
-from sentence_transformers import SentenceTransformer, models
+from sentence_transformers import SentenceTransformer
 import torchmetrics
+from sentence_transformers.util import batch_to_device
 
 
 class SBERT(L.LightningModule):
@@ -21,7 +22,7 @@ class SBERT(L.LightningModule):
 
     def forward(self, x: Tensor) -> Tensor:
         tokens = self.model.tokenize(x)
-        print(tokens)
+        tokens = batch_to_device(tokens, self.device)
         return self.model(tokens)
 
     def training_step(self, batch) -> Tensor:
@@ -29,8 +30,6 @@ class SBERT(L.LightningModule):
 
         output_question = self(x_question)
         output_answer = self(x_answer)
-
-        print(output_question)
 
         embeddings_question = output_question["sentence_embedding"]
         embeddings_answer = output_answer["sentence_embedding"]
@@ -47,17 +46,11 @@ class SBERT(L.LightningModule):
     def validation_step(self, batch):
         x_question, x_answer, y = batch
 
-        print(x_question)
-        print(y)
-
         output_question = self(x_question)
         output_answer = self(x_answer)
 
         embeddings_question = output_question["sentence_embedding"]
         embeddings_answer = output_answer["sentence_embedding"]
-
-        print(embeddings_question)
-        print(embeddings_question.device)
 
         similarity = self.cosine(embeddings_question, embeddings_answer)
         loss = self.criterion(similarity, y)
