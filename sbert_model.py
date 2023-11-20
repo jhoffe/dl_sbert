@@ -6,7 +6,7 @@ import torchmetrics
 
 
 class SBERT(L.LightningModule):
-    def __init__(self, model: SentenceTransformer, criterion: nn.Module) -> None:
+    def __init__(self, model: SentenceTransformer, criterion: nn.Module, lr: float = 1e-5) -> None:
         super().__init__()
 
         self.model = model
@@ -14,6 +14,7 @@ class SBERT(L.LightningModule):
 
         self.cosine = nn.CosineSimilarity()
         self.criterion = criterion
+        self.lr = lr
 
         self.cosine_similarity_train = torchmetrics.CosineSimilarity(reduction="mean")
         self.cosine_similarity_val = torchmetrics.CosineSimilarity(reduction="mean")
@@ -63,4 +64,7 @@ class SBERT(L.LightningModule):
 
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("test_cosine_similarity", self.cosine_similarity_test, on_step=True, on_epoch=True, prog_bar=True)
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=self.lr)
 
