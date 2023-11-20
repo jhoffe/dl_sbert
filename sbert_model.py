@@ -46,6 +46,8 @@ class SBERT(L.LightningModule):
     def validation_step(self, batch):
         x_question, x_answer, y = batch
 
+        print(x_question)
+
         output_question = self(x_question)
         output_answer = self(x_answer)
 
