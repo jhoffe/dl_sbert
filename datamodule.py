@@ -13,7 +13,7 @@ class MSMarcoDataModule(L.LightningDataModule):
 
         self.dev = dev
         self.seed = seed
-        self.num_workers = cpu_count() if num_workers is None else num_workers
+        self.num_workers = cpu_count() // 2 if num_workers is None else num_workers
 
         self.generator = torch.Generator().manual_seed(self.seed)
 
