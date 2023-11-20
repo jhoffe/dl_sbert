@@ -9,7 +9,7 @@ from torch.utils.data import Subset
 
 print("Is there a GPU:", torch.cuda.is_available())
 
-model = SentenceTransformer("distilbert-base-nli-mean-tokens")
+model = SentenceTransformer("bert-base-nli-mean-tokens")
 
 train_ds = MSMarcoDataset(
     qrels_path="data/qrels.train.tsv",
