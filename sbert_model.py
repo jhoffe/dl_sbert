@@ -21,6 +21,7 @@ class SBERT(L.LightningModule):
 
     def forward(self, x: Tensor) -> Tensor:
         tokens = self.model.tokenize(x)
+        print(tokens)
         return self.model(tokens)
 
     def training_step(self, batch) -> Tensor:
