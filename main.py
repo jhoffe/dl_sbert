@@ -16,8 +16,9 @@ import click
 @click.option("--num_workers", default=None, type=int)
 @click.option("--lr", default=1e-5, type=float)
 @click.option("--precision", default=None, type=str)
+@click.option("--sample_negatives", default=False, type=bool)
 def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int, lr: float,
-          precision: str | None = None):
+          precision: str | None = None, sample_negatives: bool = False):
     L.seed_everything(seed)
 
     model = SentenceTransformer(model)
@@ -25,6 +26,7 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
     logger = WandbLogger(
         project="dl_sbert",
         entity="colodingdongs",
+        log_model="all"
     )
 
     trainer = L.Trainer(

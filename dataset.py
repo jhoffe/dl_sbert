@@ -9,13 +9,12 @@ class MSMarcoDataset(Dataset):
             qrels_path: str = "data/qrels.dev.small.tsv",
             queries_path: str = "data/queries.dev.small.tsv",
             passages_path: str = "data/collection.tsv",
-            tokenizer=None,
+            sample_negatives: bool = False,
     ):
         self.qrels_path = qrels_path
         self.queries_path = queries_path
         self.passages_path = passages_path
-
-        self.tokenizer = tokenizer
+        self.sample_negatives = sample_negatives
 
         qrels_table = pd.read_csv(
             self.qrels_path,
@@ -41,10 +40,22 @@ class MSMarcoDataset(Dataset):
         }
 
     def __len__(self) -> int:
-        return len(self.qrels)
+        return len(self.qrels) * 2 if self.sample_negatives else len(self.qrels)
+
+    def _sample_negative(self, idx: int) -> tuple[int, int, float]:
+        query_id, passage_id, label = self.qrels[idx]
+
+        avail_idx = [i for i in range(len(self.qrels)) if self.qrels[i][0] != query_id]
+
+        random_passage_id = np.random.choice(avail_idx)
+
+        return query_id, random_passage_id, 0.0
 
     def __getitem__(self, idx: int):
-        query_id, passage_id, label = self.qrels[idx]
+        if idx >= len(self.qrels):
+            query_id, passage_id, label = self._sample_negative(idx)
+        else:
+            query_id, passage_id, label = self.qrels[idx]
 
         return self.queries[query_id], self.passages[passage_id], float(label)
 
@@ -52,10 +63,8 @@ class MSMarcoDataset(Dataset):
 class MSMarcoDatasetTest(Dataset):
     def __init__(
             self,
-            dataset_path: str = "data/msmarco-passagetest2019-top1000.tsv",
-            tokenizer=None
+            dataset_path: str = "data/msmarco-passagetest2019-top1000.tsv"
     ):
-        self.tokenizer = tokenizer
         self.ds_path = dataset_path
 
         self.ds_table = pd.read_csv(

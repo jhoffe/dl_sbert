@@ -8,12 +8,13 @@ from dataset import MSMarcoDataset, MSMarcoDatasetTest
 
 
 class MSMarcoDataModule(L.LightningDataModule):
-    def __init__(self, batch_size: int = 256, dev: bool = False, seed: int = 42, num_workers: int | None = None):
+    def __init__(self, batch_size: int = 256, dev: bool = False, seed: int = 42, num_workers: int | None = None, sample_negatives: bool = False):
         super().__init__()
 
         self.dev = dev
         self.seed = seed
         self.num_workers = cpu_count() // 2 if num_workers is None else num_workers
+        self.sample_negatives = sample_negatives
 
         self.generator = torch.Generator().manual_seed(self.seed)
 
@@ -21,7 +22,8 @@ class MSMarcoDataModule(L.LightningDataModule):
         self.train = MSMarcoDataset(
             qrels_path="data/qrels.train.tsv" if not dev else "data/qrels.dev.small.tsv",
             queries_path="data/queries.train.tsv" if not dev else "data/queries.dev.small.tsv",
-            passages_path="data/collection.tsv" if not dev else "data/collection.small.tsv"
+            passages_path="data/collection.tsv" if not dev else "data/collection.small.tsv",
+            sample_negatives=sample_negatives
         )
         self.test = MSMarcoDatasetTest(
             dataset_path="data/msmarco-passagetest2019-top1000.tsv" if not dev else "data/msmarco-passagetest2019-top1000.small.tsv"
