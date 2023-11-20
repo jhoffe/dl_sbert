@@ -52,6 +52,9 @@ class SBERT(L.LightningModule):
         embeddings_question = output_question["sentence_embedding"]
         embeddings_answer = output_answer["sentence_embedding"]
 
+        print(embeddings_question)
+        print(embeddings_question.device)
+
         similarity = self.cosine(embeddings_question, embeddings_answer)
         loss = self.criterion(similarity, y)
         self.cosine_similarity_val(similarity, y)
