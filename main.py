@@ -15,9 +15,9 @@ import click
 @click.option("--seed", default=42, type=int)
 @click.option("--num_workers", default=None, type=int)
 @click.option("--lr", default=1e-5, type=float)
-@click.option("--precision", default=None, type=int | str | None)
+@click.option("--precision", default=None, type=str)
 def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int, lr: float,
-          precision: int | None = None):
+          precision: str | None = None):
     L.seed_everything(seed)
 
     model = SentenceTransformer(model)
