@@ -29,6 +29,8 @@ class SBERT(L.LightningModule):
         output_question = self(x_question)
         output_answer = self(x_answer)
 
+        print(output_question)
+
         embeddings_question = output_question["sentence_embedding"]
         embeddings_answer = output_answer["sentence_embedding"]
 
