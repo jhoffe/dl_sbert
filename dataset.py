@@ -43,7 +43,7 @@ class MSMarcoDataset(Dataset):
         return len(self.qrels) * 2 if self.sample_negatives else len(self.qrels)
 
     def _sample_negative(self, idx: int) -> tuple[int, int, float]:
-        query_id, passage_id, label = self.qrels[idx]
+        query_id, passage_id, label = self.qrels[idx // 2]
 
         avail_idx = [i for i in range(len(self.qrels)) if self.qrels[i][0] != query_id]
 
