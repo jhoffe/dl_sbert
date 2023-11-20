@@ -24,7 +24,7 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
 
     logger = WandbLogger(
         project="dl_sbert",
-        entity="colodingdong",
+        entity="colodingdongs",
     )
 
     trainer = L.Trainer(
