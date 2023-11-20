@@ -54,7 +54,7 @@ class SBERT(L.LightningModule):
 
         similarity = self.cosine(embeddings_question, embeddings_answer)
         loss = self.criterion(similarity, y)
-        self.cosine_similarity_val(similarity, y)
+        self.cosine_similarity_val(embeddings_question, embeddings_answer)
 
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("val_cosine_similarity", self.cosine_similarity_val, on_step=True, on_epoch=True, prog_bar=True)
@@ -70,7 +70,7 @@ class SBERT(L.LightningModule):
 
         similarity = self.cosine(embeddings_question, embeddings_answer)
         loss = self.criterion(similarity, y)
-        self.cosine_similarity_test(similarity, y)
+        self.cosine_similarity_test(embeddings_question, embeddings_answer)
 
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("test_cosine_similarity", self.cosine_similarity_test, on_step=True, on_epoch=True, prog_bar=True)

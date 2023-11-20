@@ -21,8 +21,8 @@
 # if you want to receive e-mail notifications on a non-default address
 ### -- Specify the output and error file. %J is the job-id --
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
-#BSUB -o Output_dl_sbert_train_%J.out
-#BSUB -e Output_dl_sbert_train_%J.err
+#BSUB -o logs/Output_dl_sbert_train_%J.out
+#BSUB -e logs/Output_dl_sbert_train_%J.err
 
 cd /work3/s204071/dl_sbert
 
