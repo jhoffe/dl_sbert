@@ -9,7 +9,7 @@ class SBERT(L.LightningModule):
     def __init__(self, model: SentenceTransformer, criterion: nn.Module, lr: float = 1e-5) -> None:
         super().__init__()
 
-        self.model = model
+        self.model = model.to(self.device)
 
         self.cosine = nn.CosineSimilarity()
         self.criterion = criterion
