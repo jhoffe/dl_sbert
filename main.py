@@ -16,7 +16,7 @@ import click
 @click.option("--num_workers", default=None, type=int)
 @click.option("--lr", default=1e-5, type=float)
 @click.option("--precision", default=None, type=str)
-@click.option("--sample_negatives", default=False, type=bool)
+@click.option("--sample_negatives", default=False, type=bool, is_flag=True)
 def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int, lr: float,
           precision: str | None = None, sample_negatives: bool = False):
     L.seed_everything(seed)
@@ -38,7 +38,7 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
         precision=precision
     )
 
-    datamodule = MSMarcoDataModule(batch_size=batch_size, num_workers=num_workers)
+    datamodule = MSMarcoDataModule(batch_size=batch_size, num_workers=num_workers, sample_negatives=sample_negatives)
 
     l_module = SBERT(model, torch.nn.MSELoss(), lr=lr)
 
