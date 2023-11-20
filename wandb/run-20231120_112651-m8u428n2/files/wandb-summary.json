@@ -1,1 +1,0 @@
-{"test_loss_step": 0.5538168598286042, "test_cosine_similarity_step": 1.0, "trainer/global_step": 259, "_timestamp": 1700476043.9465, "_runtime": 32.36016511917114, "_step": 259, "_wandb": {"runtime": 31}}

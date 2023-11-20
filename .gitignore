@@ -163,3 +163,4 @@ data/
 models/
 logs/
 venv/
+wandb/
