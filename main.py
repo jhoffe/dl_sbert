@@ -3,6 +3,7 @@ import lightning as L
 from sentence_transformers import SentenceTransformer
 
 from datamodule import MSMarcoDataModule
+from datamodule_v2 import MSMarcoDataModuleV2
 from sbert_model import SBERT
 from lightning.pytorch.loggers import WandbLogger
 import click
@@ -16,9 +17,9 @@ import click
 @click.option("--num_workers", default=None, type=int)
 @click.option("--lr", default=1e-5, type=float)
 @click.option("--precision", default=None, type=str)
-@click.option("--sample_negatives", default=False, type=bool, is_flag=True)
+@click.option("--dev", default=False, type=bool, is_flag=True)
 def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int, lr: float,
-          precision: str | None = None, sample_negatives: bool = False):
+          precision: str | None = None, dev: bool = False):
     L.seed_everything(seed)
 
     model = SentenceTransformer(model)
@@ -35,15 +36,16 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
         devices=1 if torch.cuda.is_available() else "auto",
         deterministic=True,
         logger=logger,
-        precision=precision
+        precision=precision,
+        fast_dev_run=dev
     )
 
-    datamodule = MSMarcoDataModule(batch_size=batch_size, num_workers=num_workers, sample_negatives=sample_negatives)
+    datamodule = MSMarcoDataModuleV2(batch_size=batch_size, num_workers=num_workers)
 
     l_module = SBERT(model, torch.nn.MSELoss(), lr=lr)
 
     trainer.fit(l_module, datamodule)
-    trainer.test(l_module, datamodule)
+    #trainer.test(l_module, datamodule)
 
 
 if __name__ == "__main__":

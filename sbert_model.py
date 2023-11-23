@@ -16,11 +16,29 @@ class SBERT(L.LightningModule):
         self.criterion = criterion
         self.lr = lr
 
+        self.train_metrics = torchmetrics.MetricCollection({
+            "train_accuracy_k1": torchmetrics.Accuracy(task="binary"),
+            "train_accuracy_k3": torchmetrics.Accuracy(task="binary", top_k=3),
+            "train_accuracy_k5": torchmetrics.Accuracy(task="binary", top_k=5),
+        })
+
+        self.validation_metrics = torchmetrics.MetricCollection({
+            "val_accuracy_k1": torchmetrics.Accuracy(task="binary"),
+            "val_accuracy_k3": torchmetrics.Accuracy(task="binary", top_k=3),
+            "val_accuracy_k5": torchmetrics.Accuracy(task="binary", top_k=5),
+        })
+
+        self.test_metrics = torchmetrics.MetricCollection({
+            "test_accuracy_k1": torchmetrics.Accuracy(task="binary"),
+            "test_accuracy_k3": torchmetrics.Accuracy(task="binary", top_k=3),
+            "test_accuracy_k5": torchmetrics.Accuracy(task="binary", top_k=5),
+        })
+
         self.cosine_similarity_train = torchmetrics.CosineSimilarity(reduction="mean")
-        self.cosine_similarity_val = torchmetrics.CosineSimilarity(reduction="mean")
+        self.cosine_similarity_validation = torchmetrics.CosineSimilarity(reduction="mean")
         self.cosine_similarity_test = torchmetrics.CosineSimilarity(reduction="mean")
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x) -> Tensor:
         tokens = self.model.tokenize(x)
         tokens = batch_to_device(tokens, self.device)
         return self.model(tokens)
@@ -35,11 +53,16 @@ class SBERT(L.LightningModule):
         embeddings_answer = output_answer["sentence_embedding"]
 
         similarity = self.cosine(embeddings_question, embeddings_answer)
-        loss = self.criterion(similarity.to(torch.float32), y.to(torch.float32))
+        y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
+
+        loss = self.criterion(y_hat, y)
         self.cosine_similarity_train(embeddings_question, embeddings_answer)
+
+        self.train_metrics(y_hat, y)
 
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("train_cosine_similarity", self.cosine_similarity_train, on_step=True, on_epoch=True, prog_bar=True)
+        self.log_dict(self.train_metrics, on_step=True, on_epoch=True, prog_bar=False)
 
         return loss
 
@@ -53,11 +76,16 @@ class SBERT(L.LightningModule):
         embeddings_answer = output_answer["sentence_embedding"]
 
         similarity = self.cosine(embeddings_question, embeddings_answer)
-        loss = self.criterion(similarity, y)
-        self.cosine_similarity_val(embeddings_question, embeddings_answer)
+        y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
+
+        loss = self.criterion(y_hat, y)
+        self.cosine_similarity_validation(embeddings_question, embeddings_answer)
+
+        self.validation_metrics(y_hat, y)
 
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log("val_cosine_similarity", self.cosine_similarity_val, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("val_cosine_similarity", self.cosine_similarity_validation, on_step=True, on_epoch=True,
+                 prog_bar=False)
 
     def test_step(self, batch):
         x_question, x_answer, y = batch
@@ -69,12 +97,14 @@ class SBERT(L.LightningModule):
         embeddings_answer = output_answer["sentence_embedding"]
 
         similarity = self.cosine(embeddings_question, embeddings_answer)
-        loss = self.criterion(similarity, y)
+        y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
+        loss = self.criterion(y_hat, y)
         self.cosine_similarity_test(embeddings_question, embeddings_answer)
 
+        self.test_metrics(y_hat, y)
+
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log("test_cosine_similarity", self.cosine_similarity_test, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("test_cosine_similarity", self.cosine_similarity_test, on_step=True, on_epoch=True, prog_bar=False)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
-

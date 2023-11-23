@@ -6,3 +6,5 @@ torchmetrics~=1.2.0
 scikit-learn
 lightning~=2.1.0
 click~=8.1.7
+webdataset~=0.2.77
+tqdm~=4.66.1
