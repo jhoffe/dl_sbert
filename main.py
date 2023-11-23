@@ -44,7 +44,7 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
     l_module = SBERT(model, torch.nn.MSELoss(), lr=lr)
 
     trainer.fit(l_module, datamodule)
-    #trainer.test(l_module, datamodule)
+    trainer.test(l_module, datamodule)
 
 
 if __name__ == "__main__":
