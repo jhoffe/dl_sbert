@@ -1,58 +1,68 @@
 from multiprocessing import cpu_count
 
 import lightning as L
-import torch
-from torch.utils.data import DataLoader, random_split
-
-from dataset import MSMarcoDataset, MSMarcoDatasetTest
+from torch.utils.data import DataLoader
+import webdataset as wds
 
 
 class MSMarcoDataModule(L.LightningDataModule):
-    def __init__(self, batch_size: int = 256, dev: bool = False, seed: int = 42, num_workers: int | None = None, sample_negatives: bool = False):
+    def __init__(self, batch_size: int = 256, num_workers: int | None = None):
         super().__init__()
 
-        self.dev = dev
-        self.seed = seed
         self.num_workers = cpu_count() // 2 if num_workers is None else num_workers
-        self.sample_negatives = sample_negatives
-
-        self.generator = torch.Generator().manual_seed(self.seed)
-
         self.batch_size = batch_size
-        self.train = MSMarcoDataset(
-            qrels_path="data/qrels.train.tsv" if not dev else "data/qrels.dev.small.tsv",
-            queries_path="data/queries.train.tsv" if not dev else "data/queries.dev.small.tsv",
-            passages_path="data/collection.tsv" if not dev else "data/collection.small.tsv",
-            sample_negatives=sample_negatives
-        )
-        self.test = MSMarcoDatasetTest(
-            dataset_path="data/msmarco-passagetest2019-top1000.tsv" if not dev else "data/msmarco-passagetest2019-top1000.small.tsv"
-        )
+
+        self.train_dataset = None
+        self.validation_dataset = None
+        self.test_dataset = None
+
+    @staticmethod
+    def to_string(string: bytes) -> str:
+        return string.decode("utf-8")
+
+    @staticmethod
+    def to_float(string: bytes) -> float:
+        return float(string.decode("utf-8"))
 
     def setup(self, stage: str) -> None:
-        self.train, self.val = random_split(self.train, [0.9, 0.1], generator=self.generator)
+        self.train_dataset = (
+            wds.WebDataset("data/processed/train-{0..17}.tar", shardshuffle=True)
+            .shuffle(1000)
+            .to_tuple("query.pyd", "passage.pyd", "label.cls")
+            .map_tuple(self.to_string, self.to_string, self.to_float)
+        )
+        self.validation_dataset = (
+            wds.WebDataset("data/processed/validation-{0..1}.tar")
+            .to_tuple("query.pyd", "passage.pyd", "label.cls")
+            .map_tuple(self.to_string, self.to_string, self.to_float)
+        )
+
+        self.test_dataset = (
+            wds.WebDataset("data/processed/test.tar")
+            .to_tuple("query.pyd", "passage.pyd", "label.cls")
+            .map_tuple(self.to_string, self.to_string, self.to_float)
+        )
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.train,
+            self.train_dataset.batched(self.batch_size),
             pin_memory=True,
-            batch_size=self.batch_size,
-            shuffle=True,
+            batch_size=None,
             num_workers=self.num_workers
         )
 
     def test_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.test,
-            batch_size=self.batch_size,
+            self.test_dataset.batched(self.batch_size),
+            batch_size=None,
             pin_memory=True,
             num_workers=self.num_workers
         )
 
     def val_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.test,
-            batch_size=self.batch_size,
+            self.validation_dataset.batched(self.batch_size),
+            batch_size=None,
             pin_memory=True,
             num_workers=self.num_workers
         )

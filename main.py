@@ -3,7 +3,6 @@ import lightning as L
 from sentence_transformers import SentenceTransformer
 
 from datamodule import MSMarcoDataModule
-from datamodule_v2 import MSMarcoDataModuleV2
 from sbert_model import SBERT
 from lightning.pytorch.loggers import WandbLogger
 import click
@@ -40,7 +39,7 @@ def train(batch_size: int, model: str, epochs: int, seed: int, num_workers: int,
         fast_dev_run=dev
     )
 
-    datamodule = MSMarcoDataModuleV2(batch_size=batch_size, num_workers=num_workers)
+    datamodule = MSMarcoDataModule(batch_size=batch_size, num_workers=num_workers)
 
     l_module = SBERT(model, torch.nn.MSELoss(), lr=lr)
 
