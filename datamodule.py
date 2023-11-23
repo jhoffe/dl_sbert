@@ -9,7 +9,9 @@ class MSMarcoDataModule(L.LightningDataModule):
     def __init__(self, batch_size: int = 256, num_workers: int | None = None):
         super().__init__()
 
-        self.num_workers = cpu_count() // 2 if num_workers is None else num_workers
+        self.num_workers = (
+            cpu_count() // 2 if num_workers is None else num_workers
+        )
         self.batch_size = batch_size
 
         self.train_dataset = None
@@ -26,7 +28,9 @@ class MSMarcoDataModule(L.LightningDataModule):
 
     def setup(self, stage: str) -> None:
         self.train_dataset = (
-            wds.WebDataset("data/processed/train-{0..17}.tar", shardshuffle=True)
+            wds.WebDataset(
+                "data/processed/train-{0..17}.tar", shardshuffle=True
+            )
             .shuffle(1000)
             .to_tuple("query.pyd", "passage.pyd", "label.cls")
             .map_tuple(self.to_string, self.to_string, self.to_float)
@@ -48,7 +52,7 @@ class MSMarcoDataModule(L.LightningDataModule):
             self.train_dataset.batched(self.batch_size),
             pin_memory=True,
             batch_size=None,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -56,7 +60,7 @@ class MSMarcoDataModule(L.LightningDataModule):
             self.test_dataset.batched(self.batch_size),
             batch_size=None,
             pin_memory=True,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -64,5 +68,5 @@ class MSMarcoDataModule(L.LightningDataModule):
             self.validation_dataset.batched(self.batch_size),
             batch_size=None,
             pin_memory=True,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
         )

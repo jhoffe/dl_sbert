@@ -25,11 +25,4 @@
 #BSUB -e logs/Output_dl_sbert_train_%J.err
 
 cd /work3/s204071/dl_sbert
-
-module load python3/3.10.12
-module load cuda/11.8
-
-# Activate the relevant virtual environment:
-source ./venv/bin/activate
-
-python main.py --batch_size=256 --precision=16-true
+./scripts/train.sh
