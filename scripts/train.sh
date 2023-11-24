@@ -4,4 +4,4 @@ module load cuda/12.1.1
 # Activate the relevant virtual environment:
 source ./venv/bin/activate
 
-python main.py --batch_size=128 --precision=bf16-true
+python main.py --batch_size=128 --precision=bf16-true --num_steps=50000
