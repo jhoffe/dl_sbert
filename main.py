@@ -20,6 +20,7 @@ import wandb
 @click.option("--precision", default=None, type=str)
 @click.option("--dev", default=False, type=bool, is_flag=True)
 @click.option("--num_steps", default=5000, type=int)
+@click.option("--compile", default=False, type=bool)
 def train(
     batch_size: int,
     model: str,
@@ -30,13 +31,14 @@ def train(
     precision: str | None = None,
     dev: bool = False,
     num_steps: int = -1,
+    compile: bool = True,
 ):
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
     L.seed_everything(seed)
 
     torch.set_float32_matmul_precision("high")
-    model = torch.compile(SentenceTransformer(model), mode="max-autotune", disable=dev)
+    model = torch.compile(SentenceTransformer(model), mode="max-autotune", disable=not compile)
 
     logger = WandbLogger(
         project="dl_sbert", entity="colodingdongs", log_model="all"
