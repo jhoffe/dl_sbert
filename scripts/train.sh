@@ -1,5 +1,5 @@
 module load python3/3.10.12
-module load cuda/11.8
+module load cuda/12.1.1
 
 # Activate the relevant virtual environment:
 source ./venv/bin/activate
