@@ -187,7 +187,7 @@ class SBERT(L.LightningModule):
         self.logger.experiment.log(
             {
                 "test_confusion_matrix": wandb.Image(ConfusionMatrixDisplay.from_predictions(y, y_pred).figure_),
-                "test_roc_curve": wandb.Image(RocCurveDisplay.from_predictions(y, y_pred).figure_),
+                "test_roc_curve": wandb.Image(RocCurveDisplay.from_predictions(y, y_hat).figure_),
                 "test_accuracy": accuracy,
                 "test_precision": precision,
                 "test_recall": recall,
