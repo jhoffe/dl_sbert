@@ -6,7 +6,7 @@ import webdataset as wds
 
 
 class MSMarcoDataModule(L.LightningDataModule):
-    def __init__(self, batch_size: int = 256, num_workers: int | None = None):
+    def __init__(self, batch_size: int = 256, num_workers: int | None = None, dataset_length: int = 50_000):
         super().__init__()
 
         self.num_workers = (
@@ -17,6 +17,8 @@ class MSMarcoDataModule(L.LightningDataModule):
         self.train_dataset = None
         self.validation_dataset = None
         self.test_dataset = None
+
+        self.dataset_length = dataset_length
 
     @staticmethod
     def to_string(string: bytes) -> str:
@@ -31,6 +33,7 @@ class MSMarcoDataModule(L.LightningDataModule):
             wds.WebDataset(
                 "data/processed/train-{0..17}.tar", shardshuffle=True
             )
+            .with_length(self.dataset_length)
             .shuffle(1000)
             .to_tuple("query.pyd", "passage.pyd", "label.cls")
             .map_tuple(self.to_string, self.to_string, self.to_float)

@@ -117,6 +117,7 @@ def write_test_shards(
                 "query.pyd": query,
                 "passage.pyd": passage,
                 "label.cls": 0 if rating < 2 else 1,
+                "rating.cls": rating,
             }
         )
     test_sink.close()
