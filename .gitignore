@@ -166,3 +166,4 @@ venv/
 wandb/
 artifacts/
 wandb_cache/
+transformers_cache/
