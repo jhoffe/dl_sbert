@@ -4,14 +4,17 @@ import lightning as L
 from sentence_transformers import SentenceTransformer, models
 import torchmetrics
 from sentence_transformers.util import batch_to_device
+import numpy as np
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, \
+    average_precision_score, ConfusionMatrixDisplay, RocCurveDisplay
 
 
 class SBERT(L.LightningModule):
     def __init__(
-        self,
-        model: SentenceTransformer,
-        criterion: nn.Module,
-        lr: float = 1e-5,
+            self,
+            model: SentenceTransformer,
+            criterion: nn.Module,
+            lr: float = 1e-5,
     ) -> None:
         super().__init__()
 
@@ -57,6 +60,9 @@ class SBERT(L.LightningModule):
                 ),
             }
         )
+
+        self.y_test = []
+        self.y_hat_test = []
 
     def forward(self, x) -> Tensor:
         tokens = self.model.tokenize(x)
@@ -123,8 +129,47 @@ class SBERT(L.LightningModule):
         loss = self.criterion(y_hat, y)
 
         self.test_metrics(y_hat.detach().cpu(), y.detach().cpu())
-
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+
+        return {
+            "y_hat": y_hat.detach().cpu(),
+            "y": y.detach().cpu(),
+            "loss": loss.detach().cpu()
+        }
+
+    def on_test_batch_end(self, outputs, batch, batch_idx: int, dataloader_idx: int = 0) -> None:
+        self.y_test.append(outputs["y"])
+        self.y_hat_test.append(outputs["y_hat"])
+
+    def on_test_end(self) -> None:
+        y = torch.cat(self.y_test, dim=0)
+        y_hat = torch.cat(self.y_hat_test, dim=0)
+
+        y = y.detach().cpu().numpy()
+        y_hat = y_hat.detach().cpu().numpy()
+
+        y_pred = np.where(y_hat > 0.5, 1, 0)
+
+        accuracy = accuracy_score(y, y_pred)
+        precision = precision_score(y, y_pred)
+        recall = recall_score(y, y_pred)
+        f1 = f1_score(y, y_pred)
+        roc_auc = roc_auc_score(y, y_hat)
+        average_precision = average_precision_score(y, y_hat)
+
+        self.log("test_accuracy", accuracy, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("test_precision", precision, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("test_recall", recall, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("test_f1", f1, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("test_roc_auc", roc_auc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("test_average_precision", average_precision, on_step=False, on_epoch=True, prog_bar=True)
+
+        self.logger.experiment.log(
+            {
+                "test_confusion_matrix": ConfusionMatrixDisplay.from_predictions(y, y_pred).figure_,
+                "test_roc_curve": RocCurveDisplay.from_predictions(y, y_pred).figure_
+            }
+        )
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
