@@ -58,16 +58,6 @@ class SBERT(L.LightningModule):
             }
         )
 
-        self.cosine_similarity_train = torchmetrics.CosineSimilarity(
-            reduction="mean"
-        )
-        self.cosine_similarity_validation = torchmetrics.CosineSimilarity(
-            reduction="mean"
-        )
-        self.cosine_similarity_test = torchmetrics.CosineSimilarity(
-            reduction="mean"
-        )
-
     def forward(self, x) -> Tensor:
         tokens = self.model.tokenize(x)
         tokens = batch_to_device(tokens, self.device)
@@ -89,19 +79,11 @@ class SBERT(L.LightningModule):
         y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
 
         loss = self.criterion(y_hat, y)
-        self.cosine_similarity_train(embeddings_question, embeddings_answer)
 
-        self.train_metrics(y_hat, y)
+        self.train_metrics(y_hat.detach().cpu(), y.detach().cpu())
 
         self.log(
             "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True
-        )
-        self.log(
-            "train_cosine_similarity",
-            self.cosine_similarity_train,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
         )
         self.log_dict(
             self.train_metrics, on_step=True, on_epoch=True, prog_bar=False
@@ -122,20 +104,10 @@ class SBERT(L.LightningModule):
         y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
 
         loss = self.criterion(y_hat, y)
-        self.cosine_similarity_validation(
-            embeddings_question, embeddings_answer
-        )
 
-        self.validation_metrics(y_hat, y)
+        self.validation_metrics(y_hat.detach().cpu(), y.detach().cpu())
 
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log(
-            "val_cosine_similarity",
-            self.cosine_similarity_validation,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-        )
 
     def test_step(self, batch):
         x_question, x_answer, y = batch
@@ -149,18 +121,10 @@ class SBERT(L.LightningModule):
         similarity = self.cosine(embeddings_question, embeddings_answer)
         y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
         loss = self.criterion(y_hat, y)
-        self.cosine_similarity_test(embeddings_question, embeddings_answer)
 
-        self.test_metrics(y_hat, y)
+        self.test_metrics(y_hat.detach().cpu(), y.detach().cpu())
 
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log(
-            "test_cosine_similarity",
-            self.cosine_similarity_test,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-        )
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
