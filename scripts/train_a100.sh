@@ -23,6 +23,7 @@
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
 #BSUB -o logs/Output_dl_sbert_train_%J.out
 #BSUB -e logs/Output_dl_sbert_train_%J.err
+#BSUB -R "select[gpu80gb]"
 
 cd /work3/s204071/dl_sbert
 ./scripts/train.sh
