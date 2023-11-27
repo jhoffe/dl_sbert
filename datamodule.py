@@ -20,6 +20,8 @@ class MSMarcoDataModule(L.LightningDataModule):
 
         self.dataset_length = dataset_length
 
+        self.save_hyperparameters()
+
     @staticmethod
     def to_string(string: bytes) -> str:
         return string.decode("utf-8")

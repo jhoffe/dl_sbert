@@ -2,6 +2,7 @@ from pathlib import Path
 
 import torch
 import lightning as L
+from lightning.pytorch.tuner import Tuner
 from sentence_transformers import SentenceTransformer
 
 from datamodule import MSMarcoDataModule
