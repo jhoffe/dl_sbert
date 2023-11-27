@@ -7,7 +7,7 @@ source ./venv/bin/activate
 export WANDB_DIR=/work3/s204071/dl_sbert/wandb/
 export WANDB_CACHE_DIR=/work3/s204071/dl_sbert/wandb_cache/
 
-python main.py --batch_size=128 --precision=16-mixed --num_steps=10000 --model=distilbert-base-uncased --loss_type=cosine
-python main.py --batch_size=128 --precision=16-mixed --num_steps=10000 --model=bert-base-uncased --loss_type=cosine
-python main.py --batch_size=128 --precision=16-mixed --num_steps=10000 --model=bert-large-uncased --loss_type=cosine
-python main.py --batch_size=64 --precision=16-mixed --num_steps=10000 --model=xlm-roberta-base --loss_type=cosine
+python main.py --batch_size=128 --precision=16-mixed --num_steps=10000 --model=distilbert-base-uncased
+python main.py --batch_size=128 --precision=16-mixed --num_steps=10000 --model=bert-base-uncased
+python main.py --batch_size=128 --precision=16-mixed --num_steps=10000 --model=bert-large-uncased
+python main.py --batch_size=64 --precision=16-mixed --num_steps=10000 --model=xlm-roberta-base
