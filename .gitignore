@@ -165,3 +165,4 @@ logs/
 venv/
 wandb/
 artifacts/
+wandb_cache/
