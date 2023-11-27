@@ -38,7 +38,9 @@ def train(
     L.seed_everything(seed)
 
     torch.set_float32_matmul_precision("high")
+
     model = torch.compile(SentenceTransformer(model), mode="max-autotune", disable=not compile)
+    print(model)
 
     logger = WandbLogger(
         project="dl_sbert", entity="colodingdongs", log_model="all"
