@@ -10,5 +10,5 @@ export TRANSFORMERS_CACHE=/work3/s204071/dl_sbert/transformers_cache/
 
 python main.py --batch_size=128 --precision=16-mixed --num_steps=10000 --model=distilbert-base-uncased --loss_type=cosine
 python main.py --batch_size=128 --precision=16-mixed --num_steps=10000 --model=bert-base-uncased --loss_type=cosine
-python main.py --batch_size=32 --precision=16-mixed --num_steps=40000 --model=bert-large-uncased --loss_type=cosine
+python main.py --batch_size=64 --precision=16-mixed --num_steps=20000 --model=bert-large-uncased --loss_type=cosine
 python main.py --batch_size=32 --precision=16-mixed --num_steps=40000 --model=xlm-roberta-base --loss_type=cosine
