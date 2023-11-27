@@ -1,4 +1,5 @@
 import torch
+import wandb
 from torch import nn, Tensor
 import lightning as L
 from sentence_transformers import SentenceTransformer, models
@@ -176,10 +177,17 @@ class SBERT(L.LightningModule):
         roc_auc = roc_auc_score(y, y_hat)
         average_precision = average_precision_score(y, y_hat)
 
+        self.logger.experiment.define_metric("test_accuracy", summary="max")
+        self.logger.experiment.define_metric("test_precision", summary="max")
+        self.logger.experiment.define_metric("test_recall", summary="max")
+        self.logger.experiment.define_metric("test_f1", summary="max")
+        self.logger.experiment.define_metric("test_roc_auc", summary="max")
+        self.logger.experiment.define_metric("test_average_precision", summary="max")
+
         self.logger.experiment.log(
             {
-                "test_confusion_matrix": ConfusionMatrixDisplay.from_predictions(y, y_pred).figure_,
-                "test_roc_curve": RocCurveDisplay.from_predictions(y, y_pred).figure_,
+                "test_confusion_matrix": wandb.Image(ConfusionMatrixDisplay.from_predictions(y, y_pred).figure_),
+                "test_roc_curve": wandb.Image(RocCurveDisplay.from_predictions(y, y_pred).figure_),
                 "test_accuracy": accuracy,
                 "test_precision": precision,
                 "test_recall": recall,
