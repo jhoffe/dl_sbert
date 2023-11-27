@@ -28,6 +28,12 @@ class MSMarcoDataModule(L.LightningDataModule):
     def to_float(string: bytes) -> float:
         return float(string.decode("utf-8"))
 
+    @staticmethod
+    def rating_to_class(rating: bytes) -> float:
+        rating = float(rating.decode("utf-8"))
+
+        return 1. if rating >= 1 else 0.
+
     def setup(self, stage: str) -> None:
         self.train_dataset = (
             wds.WebDataset(
@@ -46,8 +52,8 @@ class MSMarcoDataModule(L.LightningDataModule):
 
         self.test_dataset = (
             wds.WebDataset("data/processed/test.tar")
-            .to_tuple("query.pyd", "passage.pyd", "label.cls")
-            .map_tuple(self.to_string, self.to_string, self.to_float)
+            .to_tuple("query.pyd", "passage.pyd", "rating.cls")
+            .map_tuple(self.to_string, self.to_string, self.rating_to_class)
         )
 
     def train_dataloader(self) -> DataLoader:

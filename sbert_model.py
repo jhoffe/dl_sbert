@@ -23,6 +23,9 @@ class SBERT(L.LightningModule):
 
         self.cosine = nn.CosineSimilarity()
         self.criterion = criterion
+
+        self.is_cosine_embedding_loss = isinstance(self.criterion, nn.CosineEmbeddingLoss)
+
         self.lr = lr
 
         self.train_metrics = torchmetrics.MetricCollection(
@@ -64,6 +67,8 @@ class SBERT(L.LightningModule):
         self.y_test = []
         self.y_hat_test = []
 
+        self.save_hyperparameters(ignore=["model", "criterion"])
+
     def forward(self, x) -> Tensor:
         tokens = self.model.tokenize(x)
         tokens = batch_to_device(tokens, self.device)
@@ -81,18 +86,22 @@ class SBERT(L.LightningModule):
         embeddings_question = output_question["sentence_embedding"]
         embeddings_answer = output_answer["sentence_embedding"]
 
-        similarity = self.cosine(embeddings_question, embeddings_answer)
-        y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
+        if self.is_cosine_embedding_loss:
+            loss = self.criterion(
+                embeddings_question, embeddings_answer, y
+            )
+        else:
+            similarity = self.cosine(embeddings_question, embeddings_answer)
+            y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
+            loss = self.criterion(y_hat, y)
+            self.train_metrics(y_hat.detach().cpu(), y.detach().cpu())
 
-        loss = self.criterion(y_hat, y)
-
-        self.train_metrics(y_hat.detach().cpu(), y.detach().cpu())
+            self.log_dict(
+                self.train_metrics, on_step=True, on_epoch=True, prog_bar=False
+            )
 
         self.log(
             "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True
-        )
-        self.log_dict(
-            self.train_metrics, on_step=True, on_epoch=True, prog_bar=False
         )
 
         return loss
@@ -106,12 +115,16 @@ class SBERT(L.LightningModule):
         embeddings_question = output_question["sentence_embedding"]
         embeddings_answer = output_answer["sentence_embedding"]
 
-        similarity = self.cosine(embeddings_question, embeddings_answer)
-        y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
+        if self.is_cosine_embedding_loss:
+            loss = self.criterion(
+                embeddings_question, embeddings_answer, y
+            )
+        else:
+            similarity = self.cosine(embeddings_question, embeddings_answer)
+            y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
 
-        loss = self.criterion(y_hat, y)
-
-        self.validation_metrics(y_hat.detach().cpu(), y.detach().cpu())
+            loss = self.criterion(y_hat, y)
+            self.validation_metrics(y_hat.detach().cpu(), y.detach().cpu())
 
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
 
@@ -126,7 +139,13 @@ class SBERT(L.LightningModule):
 
         similarity = self.cosine(embeddings_question, embeddings_answer)
         y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
-        loss = self.criterion(y_hat, y)
+
+        if self.is_cosine_embedding_loss:
+            loss = self.criterion(
+                embeddings_question, embeddings_answer, y
+            )
+        else:
+            loss = self.criterion(y_hat, y)
 
         self.test_metrics(y_hat.detach().cpu(), y.detach().cpu())
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
@@ -157,17 +176,16 @@ class SBERT(L.LightningModule):
         roc_auc = roc_auc_score(y, y_hat)
         average_precision = average_precision_score(y, y_hat)
 
-        self.log("test_accuracy", accuracy, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test_precision", precision, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test_recall", recall, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test_f1", f1, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test_roc_auc", roc_auc, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test_average_precision", average_precision, on_step=False, on_epoch=True, prog_bar=True)
-
         self.logger.experiment.log(
             {
                 "test_confusion_matrix": ConfusionMatrixDisplay.from_predictions(y, y_pred).figure_,
-                "test_roc_curve": RocCurveDisplay.from_predictions(y, y_pred).figure_
+                "test_roc_curve": RocCurveDisplay.from_predictions(y, y_pred).figure_,
+                "test_accuracy": accuracy,
+                "test_precision": precision,
+                "test_recall": recall,
+                "test_f1": f1,
+                "test_roc_auc": roc_auc,
+                "test_average_precision": average_precision
             }
         )
 

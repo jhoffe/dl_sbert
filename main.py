@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch
 import lightning as L
 from sentence_transformers import SentenceTransformer
@@ -21,6 +23,9 @@ import wandb
 @click.option("--dev", default=False, type=bool, is_flag=True)
 @click.option("--num_steps", default=5000, type=int)
 @click.option("--compile", default=False, type=bool)
+@click.option("--loss_type", default="MSE", type=str)
+@click.option("--test", default=False, type=bool, is_flag=True)
+@click.option("--load_model", default=None, type=str)
 def train(
     batch_size: int,
     model: str,
@@ -32,6 +37,9 @@ def train(
     dev: bool = False,
     num_steps: int = -1,
     compile: bool = True,
+    loss_type: str = "cosine",
+    test: bool = False,
+    load_model: str = None,
 ):
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -56,7 +64,8 @@ def train(
             "lr": lr,
             "precision": precision,
             "dev": dev,
-            "max_steps": num_steps
+            "max_steps": num_steps,
+            "loss_type": loss_type,
         }
     )
 
@@ -75,7 +84,19 @@ def train(
         batch_size=batch_size, num_workers=num_workers, dataset_length=num_steps
     )
 
-    l_module = SBERT(model, torch.nn.MSELoss(), lr=lr)
+    criterion = torch.nn.CosineEmbeddingLoss() if loss_type == "cosine" else torch.nn.MSELoss()
+
+    if load_model is None:
+        l_module = SBERT(model, criterion, lr=lr)
+    else:
+        artifact = logger.experiment.use_artifact(load_model, type="model")
+        artifact_dir = artifact.download()
+
+        l_module = SBERT.load_from_checkpoint(Path(artifact_dir) / "model.ckpt", model=model, criterion=criterion, lr=lr)
+
+    if test:
+        trainer.test(l_module, datamodule)
+        return
 
     trainer.fit(l_module, datamodule)
     trainer.test(l_module, datamodule)
