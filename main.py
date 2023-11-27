@@ -72,7 +72,7 @@ def train(
     )
 
     datamodule = MSMarcoDataModule(
-        batch_size=batch_size, num_workers=num_workers
+        batch_size=batch_size, num_workers=num_workers, dataset_length=num_steps
     )
 
     l_module = SBERT(model, torch.nn.MSELoss(), lr=lr)

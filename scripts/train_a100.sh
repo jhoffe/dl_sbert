@@ -5,7 +5,7 @@
 ### -- set the job Name --
 #BSUB -J dl_sbert
 ### -- ask for number of cores (default: 1) --
-#BSUB -n 12
+#BSUB -n 16
 #BSUB -gpu "num=1:mode=exclusive_process"
 
 ### -- specify that the cores must be on the same host --
