@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 import wandb
 from torch import nn, Tensor
@@ -16,11 +18,17 @@ class SBERT(L.LightningModule):
             model: SentenceTransformer,
             criterion: nn.Module,
             lr: float = 1e-5,
+            compile_model: bool = False,
     ) -> None:
         super().__init__()
 
-        self.model = model.to(self.device)
+        self.transformer = model.to(self.device)
         self.pooling = models.Pooling(model.get_sentence_embedding_dimension())
+
+        self.model = torch.compile(nn.Sequential(
+            self.transformer,
+            self.pooling
+        ), mode="max-autotune", disable=not compile_model)
 
         self.cosine = nn.CosineSimilarity()
         self.criterion = criterion
@@ -68,15 +76,14 @@ class SBERT(L.LightningModule):
         self.y_test = []
         self.y_hat_test = []
 
+        self.threshold = 0.5
+
         self.save_hyperparameters(ignore=["model", "criterion"])
 
     def forward(self, x) -> Tensor:
-        tokens = self.model.tokenize(x)
+        tokens = self.transformer.tokenize(x)
         tokens = batch_to_device(tokens, self.device)
-        x = self.model(tokens)
-        x = self.pooling(x)
-
-        return x
+        return self.model(tokens)
 
     def training_step(self, batch) -> Tensor:
         x_question, x_answer, y = batch
@@ -168,7 +175,7 @@ class SBERT(L.LightningModule):
         y = y.detach().cpu().numpy()
         y_hat = y_hat.detach().cpu().numpy()
 
-        y_pred = np.where(y_hat > 0.5, 1, 0)
+        y_pred = np.where(y_hat > self.threshold, 1, 0)
 
         accuracy = accuracy_score(y, y_pred)
         precision = precision_score(y, y_pred)
@@ -196,6 +203,23 @@ class SBERT(L.LightningModule):
                 "test_average_precision": average_precision
             }
         )
+
+    def predict_step(self, batch, batch_idx: int, dataloader_idx: int = 0) -> Any:
+        x_question, x_answer, y = batch
+
+        output_question = self(x_question)
+        output_answer = self(x_answer)
+
+        embeddings_question = output_question["sentence_embedding"]
+        embeddings_answer = output_answer["sentence_embedding"]
+
+        similarity = self.cosine(embeddings_question, embeddings_answer)
+        y_hat, y = similarity.to(torch.float32), y.to(torch.float32)
+
+        return {
+            "y_hat": y_hat.detach().cpu(),
+            "y": y.detach().cpu(),
+        }
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)

@@ -6,6 +6,7 @@ from lightning.pytorch.tuner import Tuner
 from sentence_transformers import SentenceTransformer
 
 from datamodule import MSMarcoDataModule
+from find_threshold import find_threshold
 from sbert_model import SBERT
 from lightning.pytorch.loggers import WandbLogger
 import click
@@ -48,7 +49,7 @@ def train(
 
     torch.set_float32_matmul_precision("high")
 
-    model = torch.compile(SentenceTransformer(model), mode="max-autotune", disable=not compile)
+    model = SentenceTransformer(model)
     print(model)
 
     logger = WandbLogger(
@@ -88,7 +89,7 @@ def train(
     criterion = torch.nn.CosineEmbeddingLoss() if loss_type == "cosine" else torch.nn.MSELoss()
 
     if load_model is None:
-        l_module = SBERT(model, criterion, lr=lr)
+        l_module = SBERT(model, criterion, lr=lr, compile_model=compile)
     else:
         artifact = logger.experiment.use_artifact(load_model, type="model")
         artifact_dir = artifact.download()
@@ -98,6 +99,10 @@ def train(
     if test:
         trainer.test(l_module, datamodule)
         return
+
+    threshold = find_threshold(trainer, l_module, datamodule)
+
+    l_module.threshold = threshold
 
     trainer.fit(l_module, datamodule)
     trainer.test(l_module, datamodule)

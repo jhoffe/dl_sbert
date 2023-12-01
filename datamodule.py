@@ -1,6 +1,7 @@
 from multiprocessing import cpu_count
 
 import lightning as L
+from lightning.pytorch.utilities.types import EVAL_DATALOADERS
 from torch.utils.data import DataLoader
 import webdataset as wds
 
@@ -81,3 +82,6 @@ class MSMarcoDataModule(L.LightningDataModule):
             pin_memory=True,
             num_workers=self.num_workers,
         )
+
+    def predict_dataloader(self) -> DataLoader:
+        return self.val_dataloader()
