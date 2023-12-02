@@ -7,7 +7,7 @@ def normalize(x: torch.Tensor) -> torch.Tensor:
     return (x + 1) / 2
 
 
-def find_threshold(trainer: L.Trainer, module: L.LightningModule, data_module: L.LightningDataModule) -> torch.Tensor:
+def find_threshold(trainer: L.Trainer, module: L.LightningModule, data_module: L.LightningDataModule) -> float:
     predictions: list[dict[str, torch.Tensor]] = trainer.predict(module, datamodule=data_module)
 
     y = torch.cat([batch["y"] for batch in predictions]).cpu().numpy()
@@ -27,4 +27,4 @@ def find_threshold(trainer: L.Trainer, module: L.LightningModule, data_module: L
             best_f1 = f1
             best_threshold = threshold
 
-    return torch.Tensor([best_threshold])
+    return best_threshold
