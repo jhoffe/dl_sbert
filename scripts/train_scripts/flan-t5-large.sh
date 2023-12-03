@@ -3,10 +3,11 @@
 ### -- specify queue --
 #BSUB -q gpua100
 ### -- set the job Name --
-#BSUB -J BERT-large
+#BSUB -J FlanT5-large
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 16
 #BSUB -gpu "num=1:mode=exclusive_process"
+#BSUB -R "select[gpu80gb]"
 
 ### -- specify that the cores must be on the same host --
 #BSUB -R "span[hosts=1]"
@@ -21,9 +22,8 @@
 # if you want to receive e-mail notifications on a non-default address
 ### -- Specify the output and error file. %J is the job-id --
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
-#BSUB -o logs/BERT-large_%J.out
-#BSUB -e logs/BERT-large_%J.err
-#BSUB -R "select[gpu80gb]"
+#BSUB -o logs/FlanT5-large_%J.out
+#BSUB -e logs/FlanT5-large_%J.err
 
 cd /work3/s204071/dl_sbert
 
