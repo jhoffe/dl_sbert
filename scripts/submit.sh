@@ -1,5 +1,5 @@
-bsub < models/bert.sh
-bsub < models/bert-large.sh
-bsub < models/distilbert.sh
-bsub < models/minilm.sh
-bsub < models/minilm-6-layers.sh
+bsub < scripts/train_scripts/bert.sh
+bsub < scripts/train_scripts/bert-large.sh
+bsub < scripts/train_scripts/distilbert.sh
+bsub < scripts/train_scripts/minilm.sh
+bsub < scripts/train_scripts/minilm-6-layers.sh
