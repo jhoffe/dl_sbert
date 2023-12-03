@@ -7,7 +7,6 @@
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 16
 #BSUB -gpu "num=1:mode=exclusive_process"
-#BSUB -R "select[gpu80gb]"
 
 ### -- specify that the cores must be on the same host --
 #BSUB -R "span[hosts=1]"
@@ -24,6 +23,7 @@
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
 #BSUB -o logs/FlanT5-large_%J.out
 #BSUB -e logs/FlanT5-large_%J.err
+#BSUB -R "select[gpu80gb]"
 
 cd /work3/s204071/dl_sbert
 
