@@ -77,6 +77,7 @@ class SBERT(L.LightningModule):
         self.y_hat_test = []
 
         self.threshold = 0.5
+        self.mapped_threshold = 0.5
 
         self.save_hyperparameters(ignore=["model", "criterion"])
 
@@ -168,15 +169,24 @@ class SBERT(L.LightningModule):
         self.y_test.append(outputs["y"])
         self.y_hat_test.append(outputs["y_hat"])
 
+    def map_y_hat(self, y_hat: np.ndarray) -> np.ndarray:
+        return (y_hat + 1) / 2
+
     def on_test_end(self) -> None:
         y = torch.cat(self.y_test, dim=0)
         y_hat = torch.cat(self.y_hat_test, dim=0)
 
         y = y.detach().cpu().numpy()
         y_hat = y_hat.detach().cpu().numpy()
+        y_hat_mapped = self.map_y_hat(y_hat)
 
         y_pred = np.where(y_hat > self.threshold, 1, 0)
+        y_pred_mapped = np.where(y_hat_mapped > self.mapped_threshold, 1, 0)
 
+        self.log_test_metrics(y, y_hat, y_pred, "raw")
+        self.log_test_metrics(y, y_hat_mapped, y_pred_mapped, "mapped")
+
+    def log_test_metrics(self, y, y_hat, y_pred, prefix):
         accuracy = accuracy_score(y, y_pred)
         precision = precision_score(y, y_pred)
         recall = recall_score(y, y_pred)
@@ -184,23 +194,16 @@ class SBERT(L.LightningModule):
         roc_auc = roc_auc_score(y, y_hat)
         average_precision = average_precision_score(y, y_hat)
 
-        self.logger.experiment.define_metric("test_accuracy", summary="max")
-        self.logger.experiment.define_metric("test_precision", summary="max")
-        self.logger.experiment.define_metric("test_recall", summary="max")
-        self.logger.experiment.define_metric("test_f1", summary="max")
-        self.logger.experiment.define_metric("test_roc_auc", summary="max")
-        self.logger.experiment.define_metric("test_average_precision", summary="max")
-
         self.logger.experiment.log(
             {
-                "test_confusion_matrix": wandb.Image(ConfusionMatrixDisplay.from_predictions(y, y_pred).figure_),
-                "test_roc_curve": wandb.Image(RocCurveDisplay.from_predictions(y, y_hat).figure_),
-                "test_accuracy": accuracy,
-                "test_precision": precision,
-                "test_recall": recall,
-                "test_f1": f1,
-                "test_roc_auc": roc_auc,
-                "test_average_precision": average_precision
+                f"test_{prefix}_confusion_matrix": wandb.Image(ConfusionMatrixDisplay.from_predictions(y, y_pred).figure_),
+                f"test_{prefix}_roc_curve": wandb.Image(RocCurveDisplay.from_predictions(y, y_hat).figure_),
+                f"test_{prefix}_accuracy": accuracy,
+                f"test_{prefix}_precision": precision,
+                f"test_{prefix}_recall": recall,
+                f"test_{prefix}_f1": f1,
+                f"test_{prefix}_roc_auc": roc_auc,
+                f"test_{prefix}_average_precision": average_precision
             }
         )
 

@@ -100,12 +100,17 @@ def train(
         trainer.test(l_module, datamodule)
         return
 
+    trainer.fit(l_module, datamodule)
+
     threshold = find_threshold(trainer, l_module, datamodule)
     logger.experiment.config.update({"threshold": threshold})
 
-    l_module.threshold = threshold
+    mapped_threshold = find_threshold(trainer, l_module, datamodule, map=True)
+    logger.experiment.config.update({"mapped_threshold": mapped_threshold})
 
-    trainer.fit(l_module, datamodule)
+    l_module.threshold = threshold
+    l_module.mapped_threshold = mapped_threshold
+
     trainer.test(l_module, datamodule)
 
 
