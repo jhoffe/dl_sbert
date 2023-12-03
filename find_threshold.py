@@ -8,7 +8,7 @@ def normalize(x: torch.Tensor) -> torch.Tensor:
 
 
 @torch.no_grad()
-def find_threshold(trainer: L.Trainer, module: L.LightningModule, data_module: L.LightningDataModule, map: bool = False) -> float:
+def find_threshold(trainer: L.Trainer, module: L.LightningModule, data_module: L.LightningDataModule, map: bool = False) -> tuple[float, float]:
     module.eval()
     predictions: list[dict[str, torch.Tensor]] = trainer.predict(module, datamodule=data_module)
     module.train()
@@ -33,4 +33,4 @@ def find_threshold(trainer: L.Trainer, module: L.LightningModule, data_module: L
             best_f1 = f1
             best_threshold = threshold
 
-    return best_threshold
+    return best_threshold, best_f1
