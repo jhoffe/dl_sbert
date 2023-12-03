@@ -28,6 +28,7 @@ import wandb
 @click.option("--loss_type", default="MSE", type=str)
 @click.option("--test", default=False, type=bool, is_flag=True)
 @click.option("--load_model", default=None, type=str)
+@click.option("--cpu", default=False, type=bool, is_flag=True)
 def train(
     batch_size: int,
     model: str,
@@ -42,6 +43,7 @@ def train(
     loss_type: str = "cosine",
     test: bool = False,
     load_model: str = None,
+    cpu: bool = False,
 ):
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -73,7 +75,7 @@ def train(
 
     trainer = L.Trainer(
         max_epochs=epochs,
-        accelerator="auto",
+        accelerator="auto" if not cpu else "cpu",
         devices=1 if torch.cuda.is_available() else "auto",
         deterministic=True,
         logger=logger,
