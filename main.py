@@ -101,6 +101,7 @@ def train(
         return
 
     threshold = find_threshold(trainer, l_module, datamodule)
+    logger.experiment.config.update({"threshold": threshold})
 
     l_module.threshold = threshold
 
