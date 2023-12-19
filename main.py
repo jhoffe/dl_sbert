@@ -2,7 +2,6 @@ from pathlib import Path
 
 import torch
 import lightning as L
-from lightning.pytorch.tuner import Tuner
 from sentence_transformers import SentenceTransformer
 
 from datamodule import MSMarcoDataModule
@@ -11,7 +10,6 @@ from sbert_model import SBERT
 from lightning.pytorch.loggers import WandbLogger
 import click
 import os
-import wandb
 
 
 @click.command()

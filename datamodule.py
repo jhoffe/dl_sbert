@@ -1,7 +1,6 @@
 from multiprocessing import cpu_count
 
 import lightning as L
-from lightning.pytorch.utilities.types import EVAL_DATALOADERS
 from torch.utils.data import DataLoader
 import webdataset as wds
 
